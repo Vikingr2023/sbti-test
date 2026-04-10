@@ -379,6 +379,23 @@
       opacity: 0.5;
     }
 
+    .brand {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      opacity: 1;
+    }
+
+    .brand a {
+      color: var(--accent-red);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .brand a:hover {
+      text-decoration: underline;
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .logo { font-size: 2.5rem; }
@@ -437,7 +454,8 @@
     </div>
 
     <footer class="footer">
-      本测试纯属娱乐 | 结果半随机 | 认真你就输了
+      本测试纯属娱乐 | 结果半随机 | 认真你就输了<br>
+      <span class="brand">🍃 出品 <a href="https://vikingr2023.github.io/sbti-test/" target="_blank">@算力老何</a></span>
     </footer>
   </div>
 
