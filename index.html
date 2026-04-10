@@ -314,6 +314,49 @@
       opacity: 0.7;
     }
 
+    .share-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .btn-share {
+      background: #07c160;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 700;
+    }
+
+    .btn-share:hover {
+      background: #06ad56;
+      transform: scale(1.05);
+    }
+
+    .share-result {
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin: 8px 0;
+    }
+
+    .share-result.success {
+      background: #e8f8ee;
+      color: #07c160;
+    }
+
+    .share-result.error {
+      background: #fff0e8;
+      color: #e67e22;
+    }
+
     .btn-secondary {
       background: transparent;
       border: 2px solid rgba(255,255,255,0.2);
@@ -383,6 +426,11 @@
       <div class="result-desc" id="result-desc"></div>
       <div class="stats" id="stats"></div>
       <p class="share-hint">📸 截图分享到朋友圈，让朋友也焦虑一下</p>
+      <div class="share-buttons">
+        <button class="btn btn-share" onclick="copyResult()">📋 复制我的结果</button>
+        <button class="btn btn-share" onclick="shareToWechat()">💬 分享给朋友</button>
+      </div>
+      <div class="share-result" id="share-result" style="display:none"></div>
       <button class="btn btn-secondary" onclick="restartTest()">再测一次</button>
     </div>
 
@@ -937,6 +985,58 @@
       });
       document.getElementById('result-screen').style.display = 'none';
       document.getElementById('start-screen').style.display = 'block';
+      document.getElementById('share-result').style.display = 'none';
+    }
+
+    // 分享结果
+    function copyResult() {
+      const resultType = document.getElementById('result-type').textContent;
+      const resultEmoji = document.getElementById('result-emoji').textContent;
+      const resultTagline = document.getElementById('result-tagline').textContent;
+      const url = window.location.href;
+
+      const shareText = `🧪 SBTI 抽象人格测试结果\n\n${resultEmoji} ${resultType}\n"${resultTagline}"\n\n👉 测测你是哪种抽象生物：${url}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText).then(() => {
+          showShareResult('✅ 已复制到剪贴板！粘贴给朋友看看吧', 'success');
+        }).catch(() => {
+          fallbackCopy(shareText);
+        });
+      } else {
+        fallbackCopy(shareText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showShareResult('✅ 已复制！粘贴给朋友看看吧', 'success');
+      } catch (err) {
+        showShareResult('❌ 复制失败，长按选中结果手动复制', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function shareToWechat() {
+      // 微信不支持直接分享，改为复制
+      copyResult();
+    }
+
+    function showShareResult(msg, type) {
+      const el = document.getElementById('share-result');
+      el.textContent = msg;
+      el.className = 'share-result ' + type;
+      el.style.display = 'block';
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 3000);
     }
 
     // 初始化
