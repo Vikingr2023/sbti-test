@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽象人格测试 - SBTI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-card: #151515;
+      --text-primary: #f0f0f0;
+      --text-muted: #888;
+      --accent-red: #ff4757;
+      --accent-yellow: #ffa502;
+      --accent-green: #2ed573;
+      --accent-blue: #1e90ff;
+      --accent-purple: #a55eea;
+      --accent-pink: #ff6b9d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Chaos background */
+    .bg-chaos {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 71, 87, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(165, 94, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(30, 144, 255, 0.1) 0%, transparent 60%);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-yellow), var(--accent-green), var(--accent-blue), var(--accent-purple));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 4s ease infinite;
+      text-shadow: 0 0 40px rgba(255, 71, 87, 0.3);
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .tagline {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--accent-red), var(--accent-purple));
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 15px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      padding: 30px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    /* Start Screen */
+    .start-screen {
+      text-align: center;
+    }
+
+    .start-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-red), var(--accent-purple));
+      color: white;
+      border: none;
+      padding: 18px 50px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      margin-top: 30px;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(255, 71, 87, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Question Screen */
+    .question-screen {
+      display: none;
+    }
+
+    .progress {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+      background: var(--accent-red);
+      box-shadow: 0 0 15px var(--accent-red);
+    }
+
+    .progress-dot.done {
+      background: var(--accent-green);
+    }
+
+    .question-number {
+      font-size: 0.9rem;
+      color: var(--accent-yellow);
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .question-text {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 30px;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px 22px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-size: 1rem;
+      text-align: left;
+      color: var(--text-primary);
+    }
+
+    .option:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--accent-purple);
+      transform: translateX(8px);
+    }
+
+    .option.selected {
+      background: linear-gradient(135deg, rgba(165, 94, 234, 0.3), rgba(255, 71, 87, 0.3));
+      border-color: var(--accent-purple);
+    }
+
+    /* Result Screen */
+    .result-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .result-type {
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      animation: result-appear 0.8s ease-out;
+    }
+
+    @keyframes result-appear {
+      0% { 
+        opacity: 0; 
+        transform: scale(0.5) rotate(-10deg); 
+      }
+      50% { 
+        transform: scale(1.1) rotate(3deg); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0); 
+      }
+    }
+
+    .result-emoji {
+      font-size: 5rem;
+      margin: 20px 0;
+      animation: result-appear 0.8s ease-out;
+    }
+
+    .result-desc {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #bbb;
+      text-align: left;
+      padding: 20px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      margin: 20px 0;
+      white-space: pre-line;
+    }
+
+    .result-tagline {
+      font-size: 1.4rem;
+      color: var(--accent-yellow);
+      margin: 25px 0;
+      font-weight: 700;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--accent-blue);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .share-hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 30px;
+      opacity: 0.7;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.2);
+      margin-top: 15px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      box-shadow: none;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .logo { font-size: 2.5rem; }
+      .question-text { font-size: 1.1rem; }
+      .result-type { font-size: 2rem; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-chaos"></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1 class="logo">抽象人格</h1>
+      <p class="subtitle">Silly Big Personality Test</p>
+      <span class="tagline">比MBTI更懂你的自卑</span>
+    </header>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="card start-screen">
+      <div class="start-icon">🧠</div>
+      <p style="font-size: 1.1rem; line-height: 1.8; color: #aaa;">
+        这是一个比算命还不准<br>
+        但比MBTI更能戳中你内心的<br>
+        <span style="color: var(--accent-red); font-weight: 700;">当代青年精神状态检测仪</span>
+      </p>
+      <p style="margin-top: 25px; color: #666; font-size: 0.9rem;">
+        共 15 道题 | 约 2 分钟 | 结果半随机
+      </p>
+      <button class="btn" onclick="startTest()">开始检测</button>
+    </div>
+
+    <!-- Question Screen -->
+    <div id="question-screen" class="card question-screen">
+      <div class="progress" id="progress"></div>
+      <div class="question-number" id="question-number"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="card result-screen">
+      <div class="result-emoji" id="result-emoji"></div>
+      <div class="result-type" id="result-type"></div>
+      <div class="result-tagline" id="result-tagline"></div>
+      <div class="result-desc" id="result-desc"></div>
+      <div class="stats" id="stats"></div>
+      <p class="share-hint">📸 截图分享到朋友圈，让朋友也焦虑一下</p>
+      <button class="btn btn-secondary" onclick="restartTest()">再测一次</button>
+    </div>
+
+    <footer class="footer">
+      本测试纯属娱乐 | 结果半随机 | 认真你就输了
+    </footer>
+  </div>
+
+  <script>
+    // ===== 抽象人格类型库 (24种) =====
+    const personalities = [
+      {
+        type: "小丑竟是我自己",
+        emoji: "🤡",
+        tagline: "在别人的故事里流自己的眼泪",
+        desc: `你的核心特质：给别人讲道理一套一套的，轮到自己就选择性失忆。你擅长在深夜 emo 时写下800字小作文批判社会，第二天早上醒来继续当个快乐的打工人。
+
+你的社交状态：朋友圈发的永远是岁月静好，暗地里刷短视频刷到凌晨三点。每条评论都是"哈哈哈哈哈"，内心戏比宫斗剧还丰富。
+
+建议：别想太多，该吃吃该喝喝，凡事别往心里搁。`,
+        keywords: ["内心戏丰富", "深夜 emo", "朋友圈岁月静好"]
+      },
+      {
+        type: "顶级躺平大师",
+        emoji: "🛌",
+        tagline: "躺着是人类进步的阶梯",
+        desc: `你的核心特质：能躺着绝不坐着，能坐着绝不站着。你的座右铭是"明天再做"，然后把明天又过成了今天。
+
+你的工作效率：Deadline是第一生产力。在deadline前半小时，你的效率可以达到平时的1000倍——但你的身体已经进化出了自动报警系统。
+
+建议：躺着也挺好的，真的。地球没了你照样转，你躺着地球转得更快。`,
+        keywords: ["拖延症晚期", "DDL战神", "能躺不坐"]
+      },
+      {
+        type: "钱包刺客",
+        emoji: "💸",
+        tagline: "我不是月光族，我是日光族",
+        desc: `你的核心特质：工资发下来那一刻是你最有钱的时候。然后你会经历一系列神秘的经济消失术——买了个小东西、吃了顿好的、参加了同事婚礼...钱就没了。
+
+你的消费观：9.9的运费犹豫半天，999的东西眼睛都不眨。你不是没钱，你只是对数字过敏。
+
+建议：没事的，这个月花完了还有下个月，下个月还有花呗。超前消费是当代青年的基本技能。`,
+        keywords: ["月光族", "消费迷惑行为", "工资蒸发术"]
+      },
+      {
+        type: "社交恐惧症晚期",
+        emoji: "😨",
+        tagline: "我的社交能力：仅限网络",
+        desc: `你的核心特质：能发微信绝对不打电话，能打字绝对不发语音。群聊里疯狂发"哈哈哈哈哈"，现实中见到同事绕路走。
+
+你的电话恐惧：手机响了比闹钟响了还紧张。看到"未知号码"四个大字，你的内心已经演完了一部恐怖片。
+
+建议：不用逼自己社交，独处是人类最好的充电方式。实在不行，还有外卖和快递小哥拯救你的社交需求。`,
+        keywords: ["能打字不发语音", "电话恐惧", "群聊活跃现实中自闭"]
+      },
+      {
+        type: "深夜哲学家",
+        emoji: "🌙",
+        tagline: "白天笑嘻嘻，晚上想问题",
+        desc: `你的核心特质：凌晨1点到3点是你思维的黄金时段。这个时间段你会突然顿悟人生，开始思考我是谁、从哪里来、到哪里去这些终极问题。
+
+你的思考模式：洗澡时突然想通大事，躺下后又忘了。睡前觉得人生充满希望，睡醒后只想再睡一觉。
+
+建议：别想太多，真的。哲学家都吃不饱饭，你至少还能点外卖。`,
+        keywords: ["深夜思考人生", "洗澡顿悟", "睡前励志睡醒废"]
+      },
+      {
+        type: "美食勘探家",
+        emoji: "🍜",
+        tagline: "可以没有爱情，但不能没有美食",
+        desc: `你的核心特质：人生最大的追求就是"今天吃什么"。你会为了一家网红店排队三小时，也会在深夜翻遍所有外卖app就为那一口。
+
+你的觅食原则：远的不去、贵的不去、排队的不去。你对美食的执著程度让所有人都以为你在做什么了不起的大事。
+
+建议：能吃是福，真的。毕竟人生苦短，及时行乐最重要。`,
+        keywords: ["今天吃什么", "网红店打卡", "外卖选择困难"]
+      },
+      {
+        type: "追剧狂魔",
+        emoji: "📺",
+        tagline: "肝完这部就睡觉",
+        desc: `你的核心特质：周末的正确打开方式是通宵刷剧。你的flag通常是"今晚一定早睡"，然后第二天带着黑眼圈去上班。
+
+你的追剧状态：倍速是基本操作，2倍速是常规操作，3倍速才是尊重编剧。一部50集的剧，两天肝完不是梦。
+
+建议：别熬了，再熬下去你就可以本色出演《走近科学》了。`,
+        keywords: ["倍速刷剧", "熬夜冠军", "flag倒插葱"]
+      },
+      {
+        type: "健身FLAG倒插葱",
+        emoji: "💪",
+        tagline: "买装备我是认真的",
+        desc: `你的核心特质：健身装备买最专业的，健身视频收藏最全的，健身APP下载最多的。然后...就没有然后了。
+
+你的健身周期：春天来了，该减肥了 → 买健身衣 → 拍照发朋友圈 → 夏天到了该吃冰激凌了 → 冬天到了该贴膘了。
+
+建议：没关系，装备挂闲鱼还能回血。你买过的健身装备可以养活一个健身房。`,
+        keywords: ["装备党", "收藏等于做了", "健身卡回本率0%"]
+      },
+      {
+        type: "野生设计师",
+        emoji: "🎨",
+        tagline: "我的审美就是主流审美",
+        desc: `你的核心特质：虽然我没学过设计，但我觉得审美比设计师好。你改方案的理由永远是"感觉不对"，但又说不出哪里不对。
+
+你的创作理念：五彩斑斓的黑了解一下？字体要大的同时还要小？没问题，PS一键搞定。
+
+建议：自信是好事，真的。甲方爸爸需要的就是你这种不会被甲方的奇葩需求逼疯的人才。`,
+        keywords: ["五彩斑斓的黑", "甲方快乐星", "我审美很好"]
+      },
+      {
+        type: "灵魂歌手",
+        emoji: "🎤",
+        tagline: "只要我不尴尬，尴尬的就是别人",
+        desc: `你的核心特质：KTV是你的主场，浴室是你的舞台。唱得怎么样不重要，气势到位就行。你的歌声永远比原唱多三分自信。
+
+你的演唱风格：只要感情到位，走音走调不在话下。高音上不去怎么办？感情到了就行。
+
+建议：继续唱，你开心最重要。快乐是自己给的，又不是给别人听的。`,
+        keywords: ["浴室歌王", "感情充沛", "自信放声"]
+      },
+      {
+        type: "职场人肉电池",
+        emoji: "💼",
+        tagline: "加班是我的宿命",
+        desc: `你的核心特质：上班是为了下班，工作是为了不工作。你上班的动力就是等下班，下班后又焦虑今天的工作有没有做完。
+
+你的日常：早上好困，中午好困，下午好困，晚上来精神了——开始反思今天有没有摸鱼。
+
+建议：别想太多，工作只是生活的一部分。虽然这部分可能占了90%，但剩下的10%才是人生。`,
+        keywords: ["等下班", "摸鱼焦虑", "周一综合症"]
+      },
+      {
+        type: "考研/考公气氛组",
+        emoji: "📚",
+        tagline: "重在参与，贵在气氛",
+        desc: `你的核心特质：书买了=看了，资料下了=学了，去图书馆=学习了。你为考研/考公事业做出了巨大贡献——贡献了图书馆的座位和咖啡店的GDP。
+
+你的备考状态：书翻到第5页就觉得自己已经努力了，题做错两道就觉得自己需要休息。效率是什么？不存在的。
+
+建议：气氛组也是组，至少你去了。其实人生有很多路，不一定非要走最卷的那条。`,
+        keywords: ["资料达人", "气氛组担当", "书买了=看了"]
+      },
+      // ===== 新增沙雕人格 =====
+      {
+        type: "吗喽本喽",
+        emoji: "🐒",
+        tagline: "我不是人，我是吗喽",
+        desc: `你的核心特质：每天早上醒来第一个念头是"我为什么要上班"。你对生活的态度是：活着就行，别的不强求。
+
+你的日常状态：工作是吗喽，摸鱼是吗喽，下班还是吗喽。你已经进化到可以在任何场合以任何姿势睡觉的境界。
+
+建议：吗喽怎么了？吗喽也有吗喽的尊严。至少你比那些装成人的吗喽活得真实。`,
+        keywords: ["社畜天花板", "能躺就躺", "活着就行"]
+      },
+      {
+        type: "送钱者 ATM-er",
+        emoji: "🏧",
+        tagline: "插进去的是别人的焦虑，吐出来的是我的钱",
+        desc: `你的核心特质：朋友找你借钱，你比他还紧张。家人要钱，你比银行还准时。你是朋友圈里的行走的提款机。
+
+你的消费观：自己的钱是粪土，别人的钱是圣旨。你的人生信条是"能帮就帮"，然后自己吃泡面。
+
+建议：学会说不。你的善良不是别人理所当然的提款密码。该花的钱花，不该花的...也不花。`,
+        keywords: ["行走的提款机", "老好人天花板", "自己吃土别人吃肉"]
+      },
+      {
+        type: "已婚已育的行尸走肉",
+        emoji: "🧟",
+        tagline: "孩子的笑容是我的充电器，也是我的钱包漏洞",
+        desc: `你的核心特质：婚前是诗和远方，婚后是奶粉和尿布。你已经很久没有属于自己的时间了，上一次独处是什么时候？不记得了。
+
+你的日常：早上送娃，晚上接娃，周末陪娃。你的朋友圈全是娃的照片，自己已经消失在历史的尘埃里。
+
+建议：孩子是甜也是苦。偶尔给自己留一点空间，别让自己完全成为背景板。`,
+        keywords: ["带娃机器", "消失的自我", "奶粉罐里的人生"]
+      },
+      {
+        type: "FPS手指运动员",
+        emoji: "🎮",
+        tagline: "我的人生是一场永不停歇的FPS",
+        desc: `你的核心特质：你的手指比脑子还快。看到任何屏幕都想点，任何东西都想扫射。你已经分不清虚拟和现实的界限了。
+
+你的成就：全英雄熟练度max，段位比你的人生还高。你的队友是兄弟，你的对手是死敌，你的人生是游戏。
+
+建议：游戏是生活的一部分，但不是全部。下线吃口饭，你会发现现实也有任务可以做。`,
+        keywords: ["电竞选手", "手速惊人", "虚拟世界第一名"]
+      },
+      {
+        type: "相亲界劳模",
+        emoji: "💑",
+        tagline: "我见过的相亲对象比你见过的活人都多",
+        desc: `你的核心特质：你是相亲界的铁人。三年相亲180场，成功率0%。你已经可以把相亲流程倒背如流，并且能在30秒内判断出没戏。
+
+你的感悟：相亲就像抽卡，抽多了就麻木了。你已经进化出了一套完整的相亲生存指南。
+
+建议：别急，缘分这东西急不来。或者，也许你可以考虑...不找对象了？单身也挺好的。`,
+        keywords: ["相亲王中王", "单身三十年", "流水线式恋爱"]
+      },
+      {
+        type: "房东的快乐你想象不到",
+        emoji: "🏠",
+        tagline: "每个月15号是我的高光时刻",
+        desc: `你的核心特质：你不打工，你收租。别人朝九晚五，你朝九点醒五点收租。你的日程表上最重要的事是催租。
+
+你的日常：和租客斗智斗勇，和水电费斤斤计较，和物业讨价还价。你的快乐很简单：房租按时到账。
+
+建议：收租不易，且收且珍惜。记得给租客一点温暖，毕竟他们也是你的长期饭票。`,
+        keywords: ["躺赢选手", "房租自由", "别人打工我收租"]
+      },
+      {
+        type: "奶茶中毒患者",
+        emoji: "🧋",
+        tagline: "血液里流的是珍珠奶茶",
+        desc: `你的核心特质：你的一天从一杯奶茶开始，也以一杯奶茶结束。你的血糖可能比你的工资还高。
+
+你的日常：发现新奶茶店=发现新大陆。任何烦恼都可以用一杯奶茶解决，如果不行，就两杯。
+
+建议：控制一下？不，为什么要控制？开心最重要。奶茶给你带来的快乐是无价的，血糖是有价的。`,
+        keywords: ["奶茶脑袋", "糖分上瘾", "续命靠奶茶"]
+      },
+      {
+        type: "精神离职者",
+        emoji: "👻",
+        tagline: "人还在工位，魂已经在家了",
+        desc: `你的核心特质：你已经离职了——精神上。你的肉体还在工位上敲键盘，但你的灵魂早就飘到沙发上了。
+
+你的状态：领导说什么你都点头，同事说什么你都微笑。你已经练就了"身在曹营心在汉"的最高境界。
+
+建议：精神离职很爽，但记得偶尔让肉体也跟着努力一下。不然下个月的账单可能会让你精神崩溃。`,
+        keywords: ["灵魂出窍", "摸鱼大师", "身在曹营心在汉"]
+      },
+      {
+        type: "社畜终极进化体",
+        emoji: "🤖",
+        tagline: "我已经进化到不需要休息了",
+        desc: `你的核心特质：你是最完美的社畜。996对你来说是福报，007是你的日常。你已经不需要睡眠，只需要咖啡和KPI。
+
+你的日常：早上6点起床，晚上12点下班。周末？那是什么？你的生活里没有周末这个词。
+
+建议：你需要休息，真的。机器也需要保养，何况是人。别让KPI成为你的墓志铭。`,
+        keywords: ["007战士", "咖啡续命", "KPI是我的信仰"]
+      },
+      {
+        type: "朋友圈经营大师",
+        emoji: "📱",
+        tagline: "我的人生是精心策划的艺术品",
+        desc: `你的核心特质：你发的朋友圈都是精心设计的。角度、滤镜、文案、发布时间，一切都是计算过的。你的朋友圈比你本人精彩100倍。
+
+你的日常：拍照30分钟，修图20分钟，文案10分钟，发布前还要检查一遍有没有错别字。
+
+建议：经营朋友圈没错，但别忘了经营自己。朋友圈再好看，现实里的你还是得面对镜子。`,
+        keywords: ["人设专家", "朋友圈比我精彩", "精装修人生"]
+      },
+      {
+        type: "彩票梦想家",
+        emoji: "🎰",
+        tagline: "中了500万我就辞职",
+        desc: `你的核心特质：你的计划是明天中500万。每天买彩票，每天幻想，每天继续上班。你已经把这个流程重复了几百遍。
+
+你的日常：看开奖比看工资条还认真。虽然每次都落空，但"万一呢"的信念支撑着你继续买。
+
+建议：梦想可以有，但现实也得面对。把买彩票的钱存起来，一年下来也是一笔小钱。`,
+        keywords: ["中奖梦", "天天500万", "做梦第一名"]
+      },
+      {
+        type: "终极独立侠",
+        emoji: "🦸",
+        tagline: "我一个人就是一个军队",
+        desc: `你的核心特质：你不靠任何人。搬家自己搬，生病自己扛，心情不好自己消化。你已经习惯了独行侠的生活。
+
+你的日常：一个人吃饭，一个人看电影，一个人去医院。你的通讯录里没有"紧急联系人"。
+
+建议：独立是好事，但人不是孤岛。偶尔依靠一下别人，也是一种勇气。`,
+        keywords: ["独来独往", "不需要任何人", "我的世界里只有我"]
+      },
+      {
+        type: "年轻人不讲武德",
+        emoji: "🥋",
+        tagline: "我来，我见，我躺平",
+        desc: `你的核心特质：你是年轻人中的老年人，老年人中的年轻人。你既不卷，也不躺，主打一个"随缘"。
+
+你的哲学：上班摸鱼，下班摆烂。升职加薪是你的事，快乐躺平是我的事。
+
+建议：随缘挺好，但别忘了给自己定个小目标。不然30年后，你可能还是现在的状态。`,
+        keywords: ["佛系青年", "躺平不摆烂", "随缘是我的信仰"]
+      }
+    ];
+
+    // ===== 抽象问题库 (15道) =====
+    const questions = [
+      {
+        question: "深夜你躺在床上，突然想到一个人生大问题，你会：",
+        options: [
+          "想一下，然后打开短视频",
+          "赶紧记下来，明天写800字小作文",
+          "反正也想不明白，算了睡觉",
+          "这个问题太深奥了，还是想明天吃啥吧"
+        ]
+      },
+      {
+        question: "同事突然在群里发了一个笑话，你会：",
+        options: [
+          "哈哈哈哈哈（其实没看清）",
+          "内心毫无波澜，默默划过",
+          "内心笑到打鸣，表面平静如水",
+          "必须回一个更搞笑的"
+        ]
+      },
+      {
+        question: "周一早上闹钟响了，你的内心活动是：",
+        options: [
+          "再睡5分钟，就5分钟",
+          "为什么又是周一？？？",
+          "职业生涯规划：今天摸鱼明天也摸鱼",
+          "啊，又要上班了（持续石化30秒）"
+        ]
+      },
+      {
+        question: "看到一个很火的网红店，你的反应是：",
+        options: [
+          "必须打卡！排队3小时也要去！",
+          "收藏等于去了",
+          "又贵又难吃，谁爱去谁去",
+          "等我有钱了再去（永远有钱不了）"
+        ]
+      },
+      {
+        question: "朋友突然打电话让你出来玩，你会：",
+        options: [
+          "内心挣扎半天，然后说好的",
+          "看看余额，决定在家",
+          "妆都化好了，你说来？",
+          "内心想去，身体不想动"
+        ]
+      },
+      {
+        question: "你的手机通知栏通常显示什么：",
+        options: [
+          "99+未读，看都不想看",
+          "外卖到了/快递到了/工资发了",
+          "各种APP推送：您有一条新消息",
+          "哦，还有手机这个东西"
+        ]
+      },
+      {
+        question: "如果要你用一个词形容自己，你会选：",
+        options: [
+          "人间清醒（其实很迷茫）",
+          "积极废人",
+          "乐观的悲观主义者",
+          "普信但自卑"
+        ]
+      },
+      {
+        question: "别人说你"真能吃"时，你会：",
+        options: [
+          "理直气壮：我这是在享受生活",
+          "内心受伤，然后继续吃",
+          "下次再也不和他吃饭了",
+          "你懂什么，这叫食欲正常"
+        ]
+      },
+      {
+        question: "你的熬夜史通常是：",
+        options: [
+          "凌晨1点：再刷5分钟",
+          "凌晨2点：这道题真有意思",
+          "凌晨3点：人生好难",
+          "通宵：第二天直接不用睡"
+        ]
+      },
+      {
+        question: "如果明天是世界末日，你今晚会：",
+        options: [
+          "疯狂点外卖，把钱花光",
+          "给暗恋的人表白",
+          "补完所有没看完的剧",
+          "睡觉，死了也要当饱死鬼"
+        ]
+      },
+      {
+        question: "领导让你加班，你的真实想法是：",
+        options: [
+          "加班费多少？不够免谈",
+          "表面答应，实际摸鱼",
+          "好的没问题（内心已经骂了一万遍）",
+          "加班是什么？我只知道下班"
+        ]
+      },
+      {
+        question: "你在群聊里被@了，但你不知道说什么，你会：",
+        options: [
+          "假装没看到",
+          "发个表情包糊弄过去",
+          "回复'收到'（万能回复）",
+          "真诚地回答：我不知道"
+        ]
+      },
+      {
+        question: "你的购物车里现在有什么：",
+        options: [
+          "一堆想买但没买的",
+          "一堆买了但没用过的",
+          "空空如也（刚清空）",
+          "不存在购物车这回事"
+        ]
+      },
+      {
+        question: "你最后一次发自内心的笑是什么时候：",
+        options: [
+          "刚刚，看了一个搞笑视频",
+          "上周吧，记不清了",
+          "笑？那是什么感觉？",
+          "我一直在笑啊（假笑也是笑）"
+        ]
+      },
+      {
+        question: "此刻你最想做的事是：",
+        options: [
+          "睡觉，睡到自然醒",
+          "辞职，然后环游世界",
+          "中彩票，不用再打工",
+          "继续答题，看结果"
+        ]
+      }
+    ];
+
+    // 游戏状态
+    let currentQuestion = 0;
+    let answers = [];
+    let personalityScores = {};
+
+    // 初始化
+    function init() {
+      // 初始化人格分数
+      personalities.forEach((p, i) => {
+        personalityScores[i] = 0;
+      });
+      
+      // 生成分数映射 - 随机化让结果更有趣
+      window.scoreMap = {};
+      questions.forEach((q, qi) => {
+        // 每个选项映射到不同的人格
+        window.scoreMap[qi] = q.options.map(() => Math.floor(Math.random() * personalities.length));
+      });
+    }
+
+    // 开始测试
+    function startTest() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('question-screen').style.display = 'block';
+      init(); // 重新初始化分数映射
+      showQuestion();
+    }
+
+    // 显示问题
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      const progress = document.getElementById('progress');
+      const qNum = document.getElementById('question-number');
+      const qText = document.getElementById('question-text');
+      const opts = document.getElementById('options');
+
+      // 更新进度条
+      progress.innerHTML = questions.map((_, i) => 
+        `<div class="progress-dot ${i === currentQuestion ? 'active' : ''} ${i < currentQuestion ? 'done' : ''}"></div>`
+      ).join('');
+
+      // 更新问题
+      qNum.textContent = `问题 ${currentQuestion + 1} / ${questions.length}`;
+      qText.textContent = q.question;
+
+      // 更新选项
+      opts.innerHTML = q.options.map((opt, i) => `
+        <div class="option" onclick="selectOption(${i})">${opt}</div>
+      `).join('');
+    }
+
+    // 选择选项
+    function selectOption(optionIndex) {
+      // 记录答案
+      answers.push(optionIndex);
+      
+      // 更新分数
+      const mappedPersonality = window.scoreMap[currentQuestion][optionIndex];
+      personalityScores[mappedPersonality]++;
+      
+      // 下一题或显示结果
+      currentQuestion++;
+      
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    // 显示结果
+    function showResult() {
+      document.getElementById('question-screen').style.display = 'none';
+      document.getElementById('result-screen').style.display = 'block';
+
+      // 找出最高分的人格
+      let maxScore = -1;
+      let resultIndex = 0;
+      
+      Object.entries(personalityScores).forEach(([index, score]) => {
+        if (score > maxScore) {
+          maxScore = score;
+          resultIndex = parseInt(index);
+        }
+      });
+
+      // 加上随机性 (30%概率随机)
+      if (Math.random() < 0.3) {
+        resultIndex = Math.floor(Math.random() * personalities.length);
+      }
+
+      const result = personalities[resultIndex];
+
+      // 渲染结果
+      document.getElementById('result-emoji').textContent = result.emoji;
+      document.getElementById('result-type').textContent = result.type;
+      document.getElementById('result-tagline').textContent = result.tagline;
+      document.getElementById('result-desc').textContent = result.desc;
+
+      // 统计
+      const statsHtml = `
+        <div class="stat-item">
+          <div class="stat-value">${questions.length}</div>
+          <div class="stat-label">回答问题</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">${result.keywords.length}</div>
+          <div class="stat-label">核心特质</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">${Math.floor(Math.random() * 30 + 60)}%</div>
+          <div class="stat-label">匹配度</div>
+        </div>
+      `;
+      document.getElementById('stats').innerHTML = statsHtml;
+    }
+
+    // 重新开始
+    function restartTest() {
+      currentQuestion = 0;
+      answers = [];
+      personalities.forEach((p, i) => {
+        personalityScores[i] = 0;
+      });
+      document.getElementById('result-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'block';
+    }
+
+    // 初始化
+    init();
+  </script>
+</body>
+</html>
